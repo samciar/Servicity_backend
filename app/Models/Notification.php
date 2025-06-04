@@ -31,6 +31,7 @@ class Notification extends Model
         'data' => 'array',
         'read_at' => 'datetime',
         'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**

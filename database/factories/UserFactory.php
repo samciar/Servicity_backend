@@ -2,43 +2,46 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    protected $model = User::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function definition()
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'name' => $this->faker->name,
+            'email' => $this->faker->unique()->safeEmail,
+            'phone_number' => $this->faker->phoneNumber,
+            'address' => $this->faker->address,
+            'latitude' => $this->faker->latitude,
+            'longitude' => $this->faker->longitude,
+            'user_type' => $this->faker->randomElement([User::TYPE_CLIENT, User::TYPE_TASKER]),
+            'profile_picture_url' => $this->faker->imageUrl(),
+            'bio' => $this->faker->paragraph,
+            'hourly_rate' => $this->faker->numberBetween(15000, 50000),
+            'is_available' => $this->faker->boolean,
+            'id_verified' => $this->faker->boolean,
+            'password' => bcrypt('password'),
             'remember_token' => Str::random(10),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    public function client()
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+        return $this->state([
+            'user_type' => User::TYPE_CLIENT,
+        ]);
+    }
+
+    public function tasker()
+    {
+        return $this->state([
+            'user_type' => User::TYPE_TASKER,
+            'hourly_rate' => $this->faker->numberBetween(20000, 80000),
         ]);
     }
 }

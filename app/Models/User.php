@@ -145,7 +145,7 @@ class User extends Authenticatable
      */
     public function skills()
     {
-        return $this->belongsToMany(Skill::class, 'tasker_skills')
+        return $this->belongsToMany(Skill::class, 'tasker_skills', 'tasker_id')
                     ->withPivot('proficiency_level')
                     ->withTimestamps();
     }

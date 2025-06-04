@@ -118,7 +118,7 @@ class Task extends Model
      */
     public function skills(): BelongsToMany
     {
-        return $this->belongsToMany(Skill::class, 'task_skills')
+        return $this->belongsToMany(Skill::class, 'skill_task')
                    ->withTimestamps();
     }
 

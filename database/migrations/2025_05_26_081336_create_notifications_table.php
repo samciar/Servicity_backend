@@ -18,6 +18,7 @@ return new class extends Migration
             $table->jsonb('data')->nullable();
             $table->timestamp('read_at')->nullable();
             $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent();
 
             // Index for frequently queried columns
             $table->index(['user_id', 'read_at']);
