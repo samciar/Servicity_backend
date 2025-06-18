@@ -1294,6 +1294,7 @@ namespace App\Models {
     /**
      * App\Models\Notification
      *
+     * @property \Illuminate\Support\Carbon $updated_at
      * @property \Illuminate\Support\Carbon $created_at
      * @property \Illuminate\Support\Carbon|null $read_at
      * @property array|null $data
@@ -1309,6 +1310,7 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification whereData($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification whereReadAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification unread()
      * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification read()
      * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification ofType()
