@@ -30,7 +30,7 @@ class AuthController extends Controller
         return response()->json([
             'user' => $user,
             'token' => $user->createToken('auth_token')->plainTextToken,
-            'message' => 'User created successfully'
+            'message' => 'Usuario creado exitosamente'
         ], 201);
     }
 
