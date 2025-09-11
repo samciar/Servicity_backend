@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class Bid extends Model
 {
@@ -95,7 +96,34 @@ class Bid extends Model
      */
     public function accept(): bool
     {
-        return $this->update(['status' => self::STATUS_ACCEPTED]);
+        // Start a database transaction to ensure data consistency
+        return DB::transaction(function () {
+            // Update the bid status
+            if (!$this->update(['status' => self::STATUS_ACCEPTED])) {
+                return false;
+            }
+
+            // Create a booking
+            $booking = Booking::create([
+                'task_id' => $this->task_id,
+                'tasker_id' => $this->tasker_id,
+                'client_id' => $this->task->client_id,
+                'agreed_price' => $this->bid_amount,
+                'status' => Booking::STATUS_SCHEDULED,
+                'payment_status' => Booking::PAYMENT_PENDING,
+            ]);
+
+            if (!$booking) {
+                return false;
+            }
+
+            // Update the task status to assigned
+            if (!$this->task->update(['status' => Task::STATUS_ASSIGNED])) {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     /**

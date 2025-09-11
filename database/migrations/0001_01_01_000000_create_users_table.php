@@ -28,8 +28,13 @@ return new class extends Migration
             $table->decimal('hourly_rate', 8, 2)->nullable();
             $table->boolean('is_available')->default(true);
             $table->boolean('id_verified')->default(false);
+            $table->unsignedBigInteger('department_id')->nullable();
+            $table->unsignedBigInteger('municipality_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
+
+            // Foreign key constraints will be added in a separate migration
+            // after departments and municipalities tables exist
 
         });
 

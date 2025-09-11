@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('transaction_id')->nullable()->unique();
             $table->string('payment_method', 50)->nullable();
             $table->string('status', 50)->default('pending')->comment("'pending', 'completed', 'failed', 'refunded'");
-            $table->timestamp('processed_at')->useCurrent();
+            $table->timestamp('processed_at')->nullable()->useCurrent();
             $table->timestamps();
 
         });

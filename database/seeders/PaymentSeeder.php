@@ -26,17 +26,17 @@ class PaymentSeeder extends Seeder
                 'booking_id' => $booking->id,
                 'amount' => $booking->bid->bid_amount,
                 'status' => $paymentStatus,
-                'method' => $this->getRandomPaymentMethod(),
+                'payment_method' => $this->getRandomPaymentMethod(),
                 'transaction_id' => 'PAY-' . strtoupper(uniqid()),
-                'completed_at' => $paymentDate,
-                'client_id' => $booking->task->client_id,
-                'tasker_id' => $booking->tasker_id
+                'processed_at' => $paymentDate,
+                'payer_id' => $booking->task->client_id,
+                'payee_id' => $booking->tasker_id,
+                'currency' => 'USD'
             ]);
 
             // Create notification for payment
             if ($paymentStatus === 'completed') {
                 Notification::create([
-                    'user_id' => $booking->tasker_id,
                     'user_id' => $booking->tasker_id,
                     'type' => 'payment_completed',
                     'data' => json_encode([

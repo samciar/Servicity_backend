@@ -18,7 +18,7 @@ class BidController extends Controller
     {
         $bids = Bid::with(['task', 'tasker'])
             ->whereHas('task', function($query) {
-                $query->where('user_id', Auth::id());
+                $query->where('client_id', Auth::id());
             })
             ->get();
 
@@ -36,13 +36,33 @@ class BidController extends Controller
             'message' => 'nullable|string|max:500',
         ]);
 
-        $bid = Bid::create([
-            ...$validated,
-            'tasker_id' => Auth::id(),
-            'status' => Bid::STATUS_PENDING
-        ]);
+        // Check if user has an active bid on this task (pending or accepted status)
+        $existingActiveBid = Bid::where('task_id', $validated['task_id'])
+            ->where('tasker_id', Auth::id())
+            ->whereIn('status', [Bid::STATUS_PENDING, Bid::STATUS_ACCEPTED])
+            ->first();
 
-        return response()->json($bid, 201);
+        if ($existingActiveBid) {
+            return response()->json([
+                'message' => 'Ya tienes una oferta activa para esta tarea',
+                'existing_bid' => $existingActiveBid
+            ], 422);
+        }
+
+        try {
+            $bid = Bid::create([
+                ...$validated,
+                'tasker_id' => Auth::id(),
+                'status' => Bid::STATUS_PENDING
+            ]);
+
+            return response()->json($bid, 201);
+        } catch (\Exception $e) {
+            // Handle any other database errors
+            return response()->json([
+                'message' => 'Error al crear la oferta: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -138,7 +158,9 @@ class BidController extends Controller
     public function pending()
     {
         $bids = Bid::with(['task', 'tasker'])
-            ->where('tasker_id', Auth::id())
+            ->whereHas('task', function($query) {
+                $query->where('client_id', Auth::id());
+            })
             ->pending()
             ->get();
 

@@ -6,7 +6,10 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\HasApiTokens;
 
 class UserController extends Controller
 {
@@ -67,10 +70,10 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'phone_number' => 'required|string|max:20',
-            'address' => 'required|string|max:255',
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
+            'phone_number' => 'nullable|string|max:20',
+            // 'address' => 'nullable|string|max:255',
+            // 'latitude' => 'nullable|numeric|between:-90,90',
+            // 'longitude' => 'nullable|numeric|between:-180,180',
             'user_type' => ['required', Rule::in([
                 User::TYPE_CLIENT,
                 User::TYPE_TASKER,
@@ -79,6 +82,8 @@ class UserController extends Controller
             'profile_picture_url' => 'nullable|url',
             'bio' => 'nullable|string|max:500',
             'hourly_rate' => 'nullable|numeric|min:0',
+            'department_id' => 'nullable|exists:departments,id',
+            'municipality_id' => 'nullable|exists:municipalities,id',
             'skill_ids' => 'sometimes|array',
             'skill_ids.*' => 'exists:skills,id'
         ]);
@@ -87,14 +92,16 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
-            'phone_number' => $validated['phone_number'],
-            'address' => $validated['address'],
-            'latitude' => $validated['latitude'],
-            'longitude' => $validated['longitude'],
+            'phone_number' => $validated['phone_number'] ?? null,
+            // 'address' => $validated['address'],
+            // 'latitude' => $validated['latitude'],
+            // 'longitude' => $validated['longitude'],
             'user_type' => $validated['user_type'],
             'profile_picture_url' => $validated['profile_picture_url'] ?? null,
             'bio' => $validated['bio'] ?? null,
             'hourly_rate' => $validated['hourly_rate'] ?? null,
+            'department_id' => $validated['department_id'] ?? null,
+            'municipality_id' => $validated['municipality_id'] ?? null,
             'is_available' => $validated['user_type'] === User::TYPE_TASKER,
             'id_verified' => false
         ]);
@@ -103,7 +110,7 @@ class UserController extends Controller
             $user->skills()->sync($validated['skill_ids']);
         }
 
-        return response()->json($user, 201);
+        return $user;
     }
 
     /**
@@ -146,6 +153,8 @@ class UserController extends Controller
             'profile_picture_url' => 'sometimes|nullable|url',
             'bio' => 'sometimes|nullable|string|max:500',
             'hourly_rate' => 'sometimes|nullable|numeric|min:0',
+            'department_id' => 'nullable|exists:departments,id',
+            'municipality_id' => 'nullable|exists:municipalities,id',
             'is_available' => 'sometimes|boolean',
             'id_verified' => 'sometimes|boolean',
             'skill_ids' => 'sometimes|array',
@@ -242,6 +251,79 @@ class UserController extends Controller
     }
 
     /**
+     * Get dashboard statistics
+     */
+    public function statistics()
+    {
+        $statistics = [
+            'total_users' => User::count(),
+            'total_clients' => User::clients()->count(),
+            'total_taskers' => User::taskers()->count(),
+            'total_admins' => User::admins()->count(),
+            'total_tasks' => \App\Models\Task::count(),
+            'total_bids' => \App\Models\Bid::count(),
+            'total_bookings' => \App\Models\Booking::count(),
+            'active_users' => User::where('is_available', true)->count(),
+            'verified_users' => User::where('id_verified', true)->count(),
+        ];
+
+        return response()->json($statistics);
+    }
+
+    /**
+     * Register a new user
+     */
+    public function register(Request $request)
+    {
+
+        // Get the User model instance directly from store()
+        $user = $this->store($request);
+
+        // Return token response
+        return response()->json([
+            'user' => $user,
+            'token' => $user->createToken('auth_token')->plainTextToken,
+            'message' => 'Usuario creado exitosamente'
+        ], 201);
+    }
+
+    /**
+     * Login user and create token
+     */
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => [__('auth.invalid_credentials')],
+            ]);
+        }
+
+        return response()->json([
+            'user' => $user,
+            'token' => $user->createToken('auth_token')->plainTextToken
+        ]);
+    }
+
+    /**
+     * Logout user (revoke token)
+     */
+    public function logout(Request $request)
+    {
+        $request->user()->tokens()->delete();
+
+        return response()->json([
+            'message' => 'Successfully logged out'
+        ]);
+    }
+
+    /**
      * Get current authenticated user
      */
     public function me()
@@ -252,7 +334,9 @@ class UserController extends Controller
             'clientTasks',
             'assignedTasks',
             'taskerBookings',
-            'clientBookings'
+            'clientBookings',
+            'department',
+            'municipality'
         ]));
     }
 
@@ -273,6 +357,8 @@ class UserController extends Controller
             'profile_picture_url' => 'sometimes|nullable|url',
             'bio' => 'sometimes|nullable|string|max:500',
             'hourly_rate' => 'sometimes|nullable|numeric|min:0',
+            'department_id' => 'nullable|exists:departments,id',
+            'municipality_id' => 'nullable|exists:municipalities,id',
             'is_available' => 'sometimes|boolean',
             'skill_ids' => 'sometimes|array',
             'skill_ids.*' => 'exists:skills,id'

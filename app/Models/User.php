@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Department;
+use App\Models\Municipality;
 
 class User extends Authenticatable
 {
@@ -30,6 +32,8 @@ class User extends Authenticatable
         'hourly_rate',
         'is_available',
         'id_verified',
+        'department_id',
+        'municipality_id',
     ];
 
     /**
@@ -212,6 +216,22 @@ class User extends Authenticatable
     public function notifications()
     {
         return $this->hasMany(Notification::class);
+    }
+
+    /**
+     * Department for this user
+     */
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    /**
+     * Municipality for this user
+     */
+    public function municipality()
+    {
+        return $this->belongsTo(Municipality::class);
     }
 
     /**

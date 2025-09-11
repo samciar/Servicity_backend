@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bid;
 use App\Models\Task;
 use App\Models\Category;
 use App\Models\Skill;
@@ -30,8 +31,9 @@ class TaskController extends Controller
                 Task::STATUS_DISPUTED
             ])],
             'search' => 'sometimes|string|min:2',
-            'urgent' => 'sometimes|boolean',
-            'with_bids' => 'sometimes|boolean'
+            'urgent' => 'sometimes|in:true,false,1,0',
+            'with_bids' => 'sometimes|in:true,false,1,0',
+            'with_user_bid_status' => 'sometimes|in:true,false,1,0'
         ]);
 
         $query = Task::query()
@@ -53,14 +55,42 @@ class TaskController extends Controller
             $query->urgent();
         }
 
-        if ($request->boolean('with_bids')) {
+        if ($request->boolean('with_bids') || $request->boolean('with_user_bid_status')) {
             $query->with(['bids']);
         }
 
         $tasks = $query->latest()
             ->get();
 
-        return response()->json($tasks);
+        // Add user bid status if requested
+        if ($request->boolean('with_user_bid_status') && Auth::check()) {
+            $tasks->each(function ($task) {
+                // Use the eager loaded bids collection instead of querying the database
+                $userBid = $task->bids->first(function ($bid) {
+                    return $bid->tasker_id == Auth::id() && 
+                           in_array($bid->status, [Bid::STATUS_PENDING, Bid::STATUS_ACCEPTED]);
+                });
+
+                $task->user_has_bid = !is_null($userBid);
+                if ($userBid) {
+                    $task->user_bid_id = $userBid->id;
+                    $task->user_bid_status = $userBid->status;
+                } else {
+                    // Ensure these properties are set to null if no bid exists
+                    $task->user_bid_id = null;
+                    $task->user_bid_status = null;
+                }
+            });
+        }
+
+        // Make sure the dynamically added properties are included in the JSON response
+        $tasks->each(function ($task) {
+            $task->setAttribute('user_has_bid', $task->user_has_bid ?? false);
+            $task->setAttribute('user_bid_id', $task->user_bid_id ?? null);
+            $task->setAttribute('user_bid_status', $task->user_bid_status ?? null);
+        });
+
+        return response()->json($tasks->toArray());
     }
 
     /**

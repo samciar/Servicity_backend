@@ -60,7 +60,9 @@ class UserSeeder extends Seeder
                 'user_type' => User::TYPE_TASKER,
                 'bio' => 'Experto en ensamblaje de muebles y reparaciones',
                 'hourly_rate' => 25000,
-                'is_available' => true
+                'is_available' => true,
+                'department_id' => 1,
+                'municipality_id' => 1
             ],
             [
                 'name' => 'Ana López',
@@ -71,7 +73,9 @@ class UserSeeder extends Seeder
                 'user_type' => User::TYPE_TASKER,
                 'bio' => 'Profesional en limpieza de hogares y oficinas',
                 'hourly_rate' => 20000,
-                'is_available' => true
+                'is_available' => true,
+                'department_id' => 1,
+                'municipality_id' => 2
             ],
             [
                 'name' => 'Pedro Martínez',
@@ -82,7 +86,9 @@ class UserSeeder extends Seeder
                 'user_type' => User::TYPE_TASKER,
                 'bio' => 'Técnico en computadores y dispositivos electrónicos',
                 'hourly_rate' => 30000,
-                'is_available' => true
+                'is_available' => true,
+                'department_id' => 2,
+                'municipality_id' => 5
             ]
         ];
 
@@ -114,7 +120,9 @@ class UserSeeder extends Seeder
         User::factory()->count(15)->create([
             'user_type' => User::TYPE_TASKER,
             'is_available' => true,
-            'hourly_rate' => rand(15000, 40000)
+            'hourly_rate' => rand(15000, 40000),
+            'department_id' => rand(1, 5),
+            'municipality_id' => rand(1, 20)
         ]);
     }
 }

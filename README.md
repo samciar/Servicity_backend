@@ -40,6 +40,92 @@ Actualmente estamos trabajando en el diseño de interfaces y estructura funciona
 
 Este proyecto está siendo desarrollado por aprendices del **SENA** como parte del programa de formación técnica en **Análisis y Desarrollo de Software**.
 
+## 🚀 Instalación y configuración
+
+Sigue estos pasos para configurar y ejecutar el proyecto localmente:
+
+### Prerrequisitos
+- **PHP 8.2** o superior
+- **Composer** - Gestor de dependencias de PHP
+- **Node.js** y **npm** - Para dependencias de JavaScript (opcional)
+- **Base de datos** (SQLite por defecto, o MySQL/PostgreSQL configurados)
+
+### 1. Clonar el repositorio
+```bash
+git clone <url-del-repositorio>
+cd Servicity_backend
+```
+
+### 2. Instalar dependencias de PHP
+```bash
+composer install
+```
+
+### 3. Instalar dependencias de JavaScript (opcional)
+```bash
+npm install
+```
+
+### 4. Configurar variables de entorno
+```bash
+cp .env.example .env
+```
+
+Edita el archivo `.env` y configura las variables según tu entorno, especialmente:
+- `APP_NAME` - Nombre de la aplicación
+- `APP_URL` - URL de la aplicación
+- Configuración de base de datos (por defecto usa SQLite)
+
+### 5. Generar clave de aplicación
+```bash
+php artisan key:generate
+```
+
+### 6. Configurar base de datos
+Para SQLite (configuración por defecto):
+```bash
+touch database/database.sqlite
+```
+
+Para MySQL/PostgreSQL, configura las variables de entorno en `.env`:
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=servicity
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### 7. Ejecutar migraciones
+```bash
+php artisan migrate:refresh
+```
+
+### 8. Ejecutar seeders (Seeders obligatorios)
+```bash
+php artisan db:seed --class=CategorySeeder
+php artisan db:seed --class=DepartmentSeeder
+php artisan db:seed --class=MunicipalitySeeder
+```
+
+Para ejecutar todos los seeders:
+```bash
+php artisan db:seed
+```
+
+### 9. Iniciar el servidor de desarrollo
+```bash
+php artisan serve
+```
+
+La aplicación estará disponible en `http://localhost:8000`
+
+### Comandos adicionales útiles
+- **Limpiar cache**: `php artisan optimize:clear`
+- **Ver rutas disponibles**: `php artisan route:list`
+- **Ejecutar tests**: `php artisan test`
+
 ## 📄 Licencia
 
 Este proyecto está bajo la licencia [MIT](LICENSE).
