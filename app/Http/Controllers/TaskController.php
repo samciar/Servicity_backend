@@ -248,6 +248,16 @@ class TaskController extends Controller
 
         $task->update(['status' => $validated['status']]);
 
+        // If task is being marked as completed, also update the associated booking status
+        if ($validated['status'] === Task::STATUS_COMPLETED && $task->booking) {
+            $task->booking->complete();
+        }
+
+        // If task is being marked as canceled, also update the associated booking status
+        if ($validated['status'] === Task::STATUS_CANCELED && $task->booking) {
+            $task->booking->cancel();
+        }
+
         return response()->json($task);
     }
 

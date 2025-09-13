@@ -136,10 +136,17 @@ class Booking extends Model
      */
     public function markAsInProgress(): bool
     {
-        return $this->update([
+        $result = $this->update([
             'status' => self::STATUS_IN_PROGRESS,
             'start_time' => $this->start_time ?? now()
         ]);
+
+        // Update the associated task status to in_progress
+        if ($result && $this->task) {
+            $this->task->update(['status' => Task::STATUS_IN_PROGRESS]);
+        }
+
+        return $result;
     }
 
     /**
@@ -147,10 +154,17 @@ class Booking extends Model
      */
     public function complete(): bool
     {
-        return $this->update([
+        $result = $this->update([
             'status' => self::STATUS_COMPLETED,
             'end_time' => $this->end_time ?? now()
         ]);
+
+        // Update the associated task status to completed
+        if ($result && $this->task) {
+            $this->task->update(['status' => Task::STATUS_COMPLETED]);
+        }
+
+        return $result;
     }
 
     /**
@@ -158,7 +172,14 @@ class Booking extends Model
      */
     public function cancel(): bool
     {
-        return $this->update(['status' => self::STATUS_CANCELED]);
+        $result = $this->update(['status' => self::STATUS_CANCELED]);
+
+        // Update the associated task status to canceled
+        if ($result && $this->task) {
+            $this->task->update(['status' => Task::STATUS_CANCELED]);
+        }
+
+        return $result;
     }
 
     /**

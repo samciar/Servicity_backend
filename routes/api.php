@@ -12,6 +12,7 @@ use App\Http\Controllers\SkillController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\TaskerController;
 
 // Public routes
 Route::post('register', [UserController::class, 'register']);
@@ -30,6 +31,10 @@ Route::get('categories/{id}/skills', [CategoryController::class, 'byCategory']);
 Route::get('skills', [SkillController::class, 'index']);
 Route::get('skills/{id}', [SkillController::class, 'show']);
 Route::get('skills/search', [SkillController::class, 'search']);
+
+// Taskers
+Route::get('taskers', [TaskerController::class, 'index']);
+Route::get('taskers/{id}', [TaskerController::class, 'show']);
 
 // Protected routes
 Route::middleware(['auth:sanctum'])->group(function () {
