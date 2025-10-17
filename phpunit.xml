@@ -5,12 +5,29 @@
          colors="true"
 >
     <testsuites>
-        <testsuite name="Unit">
+        <!-- test directories -->
+        <testsuite name="Unit"> <!-- Passed -->
             <directory>tests/Unit</directory>
         </testsuite>
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+
+        <!-- Individual test files -->
+        <testsuite name="Auth"> <!-- Passed -->
+            <file>tests/Feature/AuthTest.php</file>
+        </testsuite>
+        <testsuite name="Task"> <!-- Passed -->
+            <file>tests/Feature/taskTest.php</file>
+        </testsuite>
+        <testsuite name="Category"> <!-- Passed -->
+            <file>tests/Feature/CategoryTest.php</file>
+        </testsuite>
+        <testsuite name="Bid">
+            <file>tests/Feature/BidTest.php</file>
+        </testsuite>
+
+
     </testsuites>
     <source>
         <include>

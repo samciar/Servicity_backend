@@ -36,6 +36,23 @@ class BidController extends Controller
             'message' => 'nullable|string|max:500',
         ]);
 
+        // Get the task to check authorization
+        $task = \App\Models\Task::findOrFail($validated['task_id']);
+
+        // Check if user is a tasker (only taskers can create bids)
+        if (Auth::user()->user_type !== \App\Models\User::TYPE_TASKER) {
+            return response()->json([
+                'message' => 'Only taskers can create bids'
+            ], 403);
+        }
+
+        // Check if tasker is trying to bid on their own task
+        if ($task->client_id === Auth::id()) {
+            return response()->json([
+                'message' => 'Taskers cannot bid on their own tasks'
+            ], 403);
+        }
+
         // Check if user has an active bid on this task (pending or accepted status)
         $existingActiveBid = Bid::where('task_id', $validated['task_id'])
             ->where('tasker_id', Auth::id())

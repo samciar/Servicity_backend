@@ -27,12 +27,14 @@ return new class extends Migration
 
         });
         
-        // Add check constraint for status
-        DB::statement("
-            ALTER TABLE payments 
-            ADD CONSTRAINT payments_status_check 
-            CHECK (status IN ('pending', 'completed', 'failed', 'refunded'))
-        ");
+        // Add check constraint for status (only for databases that support it)
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("
+                ALTER TABLE payments 
+                ADD CONSTRAINT payments_status_check 
+                CHECK (status IN ('pending', 'completed', 'failed', 'refunded'))
+            ");
+        }
     }
 
     /**
@@ -40,7 +42,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_status_check");
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_status_check");
+        }
 
         Schema::dropIfExists('payments');
     }

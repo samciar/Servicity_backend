@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -41,6 +42,15 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+
+        // Check if authenticated user is a client
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            return response()->json([
+                'message' => 'Only admins can create categories.'
+            ], 403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories',
             'description' => 'nullable|string|max:500',

@@ -24,6 +24,8 @@ Route::get('departments/{department}/municipalities', [DepartmentController::cla
 
 // Categories
 Route::get('categories', [CategoryController::class, 'index']);
+Route::get('categories/with-skills', [CategoryController::class, 'withSkills']);
+Route::get('categories/with-active-tasks', [CategoryController::class, 'withActiveTasks']);
 Route::get('categories/{id}', [CategoryController::class, 'show']);
 Route::get('categories/{id}/skills', [CategoryController::class, 'byCategory']);
 
@@ -108,8 +110,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('categories', [CategoryController::class, 'store']);
     Route::put('categories/{id}', [CategoryController::class, 'update']);
     Route::delete('categories/{id}', [CategoryController::class, 'destroy']);
-    Route::get('categories/with-skills', [CategoryController::class, 'withSkills']);
-    Route::get('categories/with-active-tasks', [CategoryController::class, 'withActiveTasks']);
 
     // Skill management routes (protected)
     Route::post('skills', [SkillController::class, 'store']);

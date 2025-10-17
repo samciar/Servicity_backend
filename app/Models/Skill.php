@@ -58,7 +58,6 @@ class Skill extends Model
     {
         return $this->hasManyThrough(
             Task::class,
-            TaskSkill::class, // Pivot table if you have one
             'skill_id',
             'id',
             'id',

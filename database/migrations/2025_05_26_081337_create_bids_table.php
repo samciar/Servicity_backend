@@ -26,12 +26,14 @@ return new class extends Migration
             
         });
         
-        // Add check constraint for status
-        DB::statement("
-            ALTER TABLE bids 
-            ADD CONSTRAINT bids_status_check 
-            CHECK (status IN ('pending', 'accepted', 'rejected', 'withdrawn'))
-        ");
+        // Add check constraint for status (only for databases that support it)
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("
+                ALTER TABLE bids 
+                ADD CONSTRAINT bids_status_check 
+                CHECK (status IN ('pending', 'accepted', 'rejected', 'withdrawn'))
+            ");
+        }
     }
 
     /**
@@ -39,7 +41,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE bids DROP CONSTRAINT IF EXISTS bids_status_check");
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE bids DROP CONSTRAINT IF EXISTS bids_status_check");
+        }
 
         Schema::dropIfExists('bids');
     }

@@ -26,18 +26,20 @@ return new class extends Migration
 
         });
         
-        // Add check constraints
-        DB::statement("
-            ALTER TABLE bookings 
-            ADD CONSTRAINT bookings_status_check 
-            CHECK (status IN ('scheduled', 'in_progress', 'completed', 'canceled', 'disputed'))
-        ");
+        // Add check constraints (only for databases that support it)
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("
+                ALTER TABLE bookings 
+                ADD CONSTRAINT bookings_status_check 
+                CHECK (status IN ('scheduled', 'in_progress', 'completed', 'canceled', 'disputed'))
+            ");
 
-        DB::statement("
-            ALTER TABLE bookings 
-            ADD CONSTRAINT bookings_payment_status_check 
-            CHECK (payment_status IN ('pending', 'paid', 'refunded'))
-        ");
+            DB::statement("
+                ALTER TABLE bookings 
+                ADD CONSTRAINT bookings_payment_status_check 
+                CHECK (payment_status IN ('pending', 'paid', 'refunded'))
+            ");
+        }
     }
 
     /**
@@ -45,8 +47,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_status_check");
-        DB::statement("ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_payment_status_check");
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_status_check");
+            DB::statement("ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_payment_status_check");
+        }
 
         Schema::dropIfExists('bookings');
     }

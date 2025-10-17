@@ -82,18 +82,14 @@ php artisan key:generate
 ```
 
 ### 6. Configurar base de datos
-Para SQLite (configuración por defecto):
-```bash
-touch database/database.sqlite
-```
 
 Para MySQL/PostgreSQL, configura las variables de entorno en `.env`:
 ```
-DB_CONNECTION=mysql
+DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=servicity
-DB_USERNAME=root
+DB_PORT=5432
+DB_DATABASE=Servicity
+DB_USERNAME=postgres
 DB_PASSWORD=
 ```
 

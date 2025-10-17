@@ -1,4 +1,4 @@
-<?php
+u<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -53,12 +53,14 @@ return new class extends Migration
             $table->integer('last_activity')->index();
         });
 
-        // Add check constraint for user_type
-        DB::statement("
-            ALTER TABLE users 
-            ADD CONSTRAINT users_user_type_check 
-            CHECK (user_type IN ('client', 'tasker', 'admin'))
-        ");
+        // Add check constraint for user_type (only for databases that support it)
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("
+                ALTER TABLE users 
+                ADD CONSTRAINT users_user_type_check 
+                CHECK (user_type IN ('client', 'tasker', 'admin'))
+            ");
+        }
     }
 
     /**
@@ -66,7 +68,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_user_type_check");
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_user_type_check");
+        }
 
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');

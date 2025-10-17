@@ -98,6 +98,14 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if authenticated user is a client
+        $user = Auth::user();
+        if (!$user || !$user->isClient()) {
+            return response()->json([
+                'message' => 'Only clients can create tasks.'
+            ], 403);
+        }
+
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
